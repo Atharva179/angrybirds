@@ -1,3 +1,4 @@
+
 const Engine = Matter.Engine;
 const World= Matter.World;
 const Bodies = Matter.Bodies;
@@ -9,9 +10,11 @@ var backgroundImg;
 var plat;
 var log6;
 var sling;
+var gameState= "onsling"
+var score = 0;
 
 function preload() {
-    backgroundImg = loadImage("sprites/bg.png");
+   getBackground();
 }
 
 function setup(){
@@ -30,7 +33,7 @@ function setup(){
 
     box3 = new Box(700,240,70,70);
     box4 = new Box(920,240,70,70);
-    pig3 = new Pig(810, 220);
+    pig2 = new Pig(810, 220);
 
     log3 =  new Log(810,180,300, PI/2);
 
@@ -47,19 +50,28 @@ function setup(){
 }
 
 function draw(){
-    background(backgroundImg);
+    if(backgroundImg){
+        background(backgroundImg); 
+    }
+    
     Engine.update(engine);
+
+    textSize(20);
+    fill("white");
+    text("SCORE:" + score, 500,50)
     
     box1.display();
     box2.display();
     ground.display();
     plat.display();
     pig1.display();
+    pig1.score();
     log1.display();
 
     box3.display();
     box4.display();
-    pig3.display();
+    pig2.display();
+    pig2.score();
     log3.display();
 
     box5.display();
@@ -76,9 +88,44 @@ function draw(){
 
 
 function mouseDragged(){
-    Matter.Body.setPosition(bird.body,{x:mouseX,y:mouseY})
+    if(gameState=== "onsling" ){
+        Matter.Body.setPosition(bird.body,{x:mouseX,y:mouseY})
+    }
+    
 }
 
 function mouseReleased () {
-    sling.fly()
+    sling.fly();
+    gameState = "launched"
+}
+
+function keyPressed() {
+    if(keyCode===32){
+        bird.trajectory = []
+        Matter.Body.setPosition(bird.body,{x:200, y:50})
+        gameState = "onsling"
+        sling.attach(bird.body)  
+    }
+}
+
+async function getBackground(){
+    var response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Kolkata");
+    var responseJSON = await response.json();
+    console.log(responseJSON.datetime);
+
+    var dt = responseJSON.datetime;
+    var hour = dt.slice(11, 13);
+
+    console.log(hour)
+
+    if(hour>=06 && hour<12){
+        var bg = "sprites/bg.png"
+    }
+
+    else{
+        var bg = "sprites/bg2.jpg"
+    }
+
+    backgroundImg = loadImage(bg)
+
 }
